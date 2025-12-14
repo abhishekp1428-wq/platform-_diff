@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CBT Mock Test – Differential Equations (JEE Main Style)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; }
+    .header { background: #1f2937; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .timer { font-size: 18px; font-weight: bold; }
+    .container { display: flex; height: calc(100vh - 60px); }
+    .left { width: 70%; padding: 20px; background: white; }
+    .right { width: 30%; background: #e5e7eb; padding: 15px; overflow-y: auto; }
+    .question { font-size: 18px; margin-bottom: 15px; }
+    .options label { display: block; padding: 8px; margin: 6px 0; background: #f9fafb; border-radius: 6px; cursor: pointer; }
+    .nav-btns { margin-top: 20px; display: flex; justify-content: space-between; gap:10px; }
+    button { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #6b7280; color: white; }
+    .review { background: #f59e0b; color: white; }
+    .qgrid button { width: 40px; height: 40px; margin: 5px; border-radius: 50%; }
+    .attempted { background: #16a34a; color: white; }
+    .notattempted { background: #dc2626; color: white; }
+    .marked { background: #f59e0b; color: white; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>Mock Test – Differential Equations (40 Questions)</div>
+  <div class="timer" id="timer">60:00</div>
+</div>
+
+<div class="container">
+  <div class="left">
+    <div id="questionBox" class="question"></div>
+    <div id="optionsBox" class="options"></div>
+
+    <div class="nav-btns">
+      <button class="secondary" onclick="prevQ()">Previous</button>
+      <button class="review" onclick="markReview()">Mark for Review</button>
+      <button class="primary" onclick="nextQ()">Next</button>
+    </div>
+  </div>
+
+  <div class="right">
+    <h3>Question Palette</h3>
+    <div class="qgrid" id="palette"></div>
+    <br />
+    <button class="primary" onclick="submitExam()">Submit Exam</button>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    {q:"A differential equation in which variables can be separated is called",o:["Linear DE","Exact DE","Separable DE","Homogeneous DE"],a:2},
+    {q:"The general solution of dy/dx = ky is",o:["y=kx","y=Ce^{kx}","y=Cx^k","y=k"],a:1},
+    {q:"Which substitution is used to solve homogeneous DE?",o:["y=vx","y=v/x","x=vy","y=x^2"],a:0},
+    {q:"Bernoulli’s equation is",o:["dy/dx+Py=Q","dy/dx+Py=Qy^n","dy/dx=Px","dy/dx=y"],a:1},
+    {q:"Exact DE satisfies",o:["∂M/∂x=∂N/∂y","∂M/∂y=∂N/∂x","M=N","M+N=0"],a:1},
+    {q:"Standard linear DE is",o:["dy/dx+Py=Q","dy/dx=Px","y+Pdy/dx=Q","d2y/dx2+Py=Q"],a:0},
+    {q:"Auxiliary equation is used in",o:["Exact DE","Separable DE","Constant coefficient DE","Homogeneous DE"],a:2},
+    {q:"Cauchy–Euler equation has coefficients",o:["constant","powers of x","exponential","trigonometric"],a:1},
+    {q:"If roots are equal, solution contains",o:["sin x","cos x","x factor","log x"],a:2},
+    {q:"If roots are complex, solution involves",o:["polynomial","log","trigonometric","rational"],a:2},
+
+    {q:"Order of DE is",o:["power","highest derivative","lowest derivative","variables"],a:1},
+    {q:"CF contains",o:["constants","functions","numbers","roots"],a:0},
+    {q:"PI is found by",o:["CF","operator method","series","separation"],a:1},
+    {q:"Simultaneous DE solved by",o:["integration","elimination","substitution","both b and c"],a:3},
+    {q:"Second order DE highest derivative is",o:["first","second","third","zero"],a:1},
+    {q:"Reduction of order used when",o:["PI known","one solution known","CF known","exact"],a:1},
+    {q:"Variation of parameters finds",o:["CF","PI","singular","general"],a:1},
+    {q:"Series solution used when",o:["coeff constant","exact","coeff variable","separable"],a:2},
+    {q:"Frobenius method is a",o:["linear","exact","series","numerical"],a:2},
+    {q:"Power series solution assumes",o:["e^x","sin x","Σa_nx^n","log x"],a:2},
+
+    {q:"PDE contains",o:["one variable","two or more variables","no derivative","constant"],a:1},
+    {q:"∂z/∂x is",o:["ordinary","partial","total","exact"],a:1},
+    {q:"Order of PDE depends on",o:["highest derivative","degree","variables","constants"],a:0},
+    {q:"Lagrange PDE form",o:["Pp+Qq=R","p^2+q^2","z=px+qy","f(p,q)=0"],a:0},
+    {q:"p denotes",o:["∂x/∂z","∂z/∂x","dx/dy","∂y/∂z"],a:1},
+    {q:"Lagrange method used for",o:["linear first order PDE","nonlinear","second order","exact"],a:0},
+    {q:"Auxiliary equations are",o:["dx/P=dy/Q","dx/P=dy/Q=dz/R","Pdx=Qdy","dx=dy"],a:1},
+    {q:"Charpit method solves",o:["linear PDE","nonlinear first order PDE","second order","homogeneous"],a:1},
+    {q:"Complete integral contains",o:["1 constant","2 constants","3 constants","none"],a:1},
+    {q:"Singular solution is",o:["general","particular","envelope","complete"],a:2},
+
+    {q:"Standard form I is",o:["z=px+qy+f(p,q)","f(p,q)=0","f(z,p,q)=0","f(x,y,p,q)=0"],a:0},
+    {q:"Standard form II is",o:["z=px+qy","f(p,q)=0","f(z,p,q)","f(x,y)"],a:1},
+    {q:"Standard form III is",o:["f(x,y)","f(p,q)","f(z,p,q)","f(x,y,p,q)"],a:2},
+    {q:"Standard form IV is",o:["f(x,y,p,q)","f(p,q)","z=px+qy","p+q=0"],a:0},
+    {q:"General solution has",o:["constants","arbitrary function","numbers","roots"],a:1},
+    {q:"∂z/∂x=0 implies",o:["z=f(x)","z=f(y)","z=x+y","z=xy"],a:1},
+    {q:"∂2z/∂x∂y=0 solution",o:["f(x)+g(y)","xy","x^2+y^2","constant"],a:0},
+    {q:"PDEs mainly used in",o:["algebra","statistics","engineering & physics","number theory"],a:2}
+  ];
+
+  let current=0;
+  let responses=Array(40).fill(null);
+  let review=Array(40).fill(false);
+
+  function loadQ(){
+    const q=questions[current];
+    document.getElementById('questionBox').innerText=(current+1)+'. '+q.q;
+    const box=document.getElementById('optionsBox');
+    box.innerHTML='';
+    q.o.forEach((op,i)=>{
+      const l=document.createElement('label');
+      l.innerHTML=`<input type='radio' name='opt' ${responses[current]===i?'checked':''} onchange='responses[${current}]=${i};updatePalette()'> ${op}`;
+      box.appendChild(l);
+    });
+    updatePalette();
+  }
+
+  function buildPalette(){
+    const p=document.getElementById('palette');
+    p.innerHTML='';
+    questions.forEach((_,i)=>{
+      const b=document.createElement('button');
+      b.innerText=i+1;
+      b.onclick=()=>{current=i;loadQ();};
+      p.appendChild(b);
+    });
+    updatePalette();
+  }
+
+  function updatePalette(){
+    document.querySelectorAll('.qgrid button').forEach((b,i)=>{
+      if(review[i]) b.className='marked';
+      else if(responses[i]!==null) b.className='attempted';
+      else b.className='notattempted';
+    });
+  }
+
+  function markReview(){review[current]=!review[current];updatePalette();}
+  function nextQ(){if(current<39){current++;loadQ();}}
+  function prevQ(){if(current>0){current--;loadQ();}}
+
+  function submitExam(){
+    let score=0;
+    responses.forEach((r,i)=>{if(r===questions[i].a)score++;});
+    alert('Exam Submitted! Score: '+score+' / 40');
+  }
+
+  let time=60*60;
+  setInterval(()=>{
+    if(time<=0) submitExam();
+    const m=Math.floor(time/60);
+    const s=time%60;
+    document.getElementById('timer').innerText=`${m}:${s.toString().padStart(2,'0')}`;
+    time--;
+  },1000);
+
+  buildPalette();
+  loadQ();
+</script>
+
+</body>
+</html>
